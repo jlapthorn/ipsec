@@ -45,10 +45,22 @@ openssl x509 -req -in /etc/pki/tls/certs/${hostname}.csr -passin pass:${CA_PASSP
 #Valifate cert
 #openssl x509 -in /etc/pki/tls/certs/${hostname}.crt -text -noout
 
+if [ ! -d pkcs12_certs ];then
+	mkdir pkcs12_certs
+fi
+
+
 #Convert to pkcs12
-openssl pkcs12 -export  -in /etc/pki/tls/certs/${hostname}.crt  -inkey /etc/pki/tls/private/${hostname}.key   -certfile /etc/pki/CA/certs/rootCA.crt   -passout pass:   -out ${hostname}.p12
+openssl pkcs12 -export  -in /etc/pki/tls/certs/${hostname}.crt  -inkey /etc/pki/tls/private/${hostname}.key   -certfile /etc/pki/CA/certs/rootCA.crt   -passout pass:   -out pkcs12_certs/${PREFIX}_${hostname}.p12
 
 #Validate pkcs12 cert
 #openssl pkcs12 -passin pass: -passout pass: -info -in ${hostname}.p12
 
+#Tidy up RSA certs
+rm -f /etc/pki/tls/certs/${hostname}.crt /etc/pki/tls/private/${hostname}.key /etc/pki/tls/certs/${hostname}.csr
+
 done < hosts.txt
+
+#Tidy up CA
+
+rm -f /etc/pki/CA/private/rootCA.key /etc/pki/CA/certs/rootCA.crt
